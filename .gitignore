@@ -1,0 +1,9 @@
+# IDE files / directories
+.idea/
+.vscode/
+
+# Coverage
+coverage/
+
+# Build artifacts
+bin/
