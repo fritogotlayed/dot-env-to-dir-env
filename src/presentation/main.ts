@@ -9,5 +9,5 @@ await new Command()
   .action(() => {
     throw new ValidationError('No sub-command specified');
   })
-  .command('writeEnv', writeEnv)
+  .command('write-env', writeEnv).alias('writeEnv')
   .parse(Deno.args);
