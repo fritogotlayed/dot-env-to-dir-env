@@ -13,7 +13,7 @@ export async function safeReadEnvFile(
     return data.split('\n').reduce((acc, line) => {
       const [key, ...value] = line.split('=');
       // if the line is empty or a comment, ignore it
-      if (!line.trim() || line.startsWith('#')) {
+      if (!line.trim() || line.trim().startsWith('#')) {
         return acc;
       }
       acc[key.trim()] = value.join('=').trim();
@@ -41,24 +41,14 @@ export async function safeWriteDotEnvFile(
 # this file make adjustments to the .env ${slug} or adjust the
 # current environment with the dot-env-to-dir-env CLI.`;
 
-  try {
-    await Deno.writeTextFile(
-      `${dirPath}/.envrc`,
-      `${header}\n${
-        Object.entries(data)
-          .map(([key, value]) => `export ${key}=${value}`)
-          .join('\n')
-      }`,
-    );
-  } catch (err) {
-    if (err instanceof Deno.errors.NotFound) {
-      console.error(
-        `Error while writing ${dirPath}/${DOT_FILE}: ${err.message}`,
-      );
-      Deno.exit(1);
-    }
-    throw err;
-  }
+  await Deno.writeTextFile(
+    `${dirPath}/.envrc`,
+    `${header}\n${
+      Object.entries(data)
+        .map(([key, value]) => `export ${key}=${value}`)
+        .join('\n')
+    }`,
+  );
 }
 
 export async function getSettingsForPath(
@@ -97,19 +87,9 @@ export async function writeSettingsForPath(
   dirPath: string,
   settings: DirSettings,
 ): Promise<void> {
-  try {
-    // Write the settings file
-    await Deno.writeTextFile(
-      `${dirPath}/${DOT_FILE}`,
-      JSON.stringify(settings),
-    );
-  } catch (err) {
-    if (err instanceof Error) {
-      console.error(
-        `Error while writing ${dirPath}/${DOT_FILE}: ${err.message}`,
-      );
-      Deno.exit(1);
-    }
-    throw err;
-  }
+  // Write the settings file
+  await Deno.writeTextFile(
+    `${dirPath}/${DOT_FILE}`,
+    JSON.stringify(settings),
+  );
 }
