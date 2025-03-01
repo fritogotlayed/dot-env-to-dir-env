@@ -21,6 +21,14 @@ deno task build
 ln -s /path/to/source/bin/dot2dir-[architecture] ~/.local/bin/dot2dir
 ```
 
+To utilize the `dot2dir` shell hook, update your shell configuration to include the following before the direnv hook.
+
+NOTE: Currently only `zsh` is supported. Other shell support welcomed via PR.
+
+```shell
+eval "$(dot2dir hook zsh)"
+```
+
 ## Development
 
 ### Dependencies

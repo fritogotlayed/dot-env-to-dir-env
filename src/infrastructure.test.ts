@@ -1,7 +1,7 @@
 import { describe, it } from '@std/testing/bdd';
 import { expect } from '@std/expect';
 import { assertSpyCall, returnsNext, stub } from '@std/testing/mock';
-import {getSettingsForPath, safeReadEnvFile, safeWriteDotEnvFile, writeSettingsForPath} from './infrastructure.ts';
+import { Infrastructure } from './infrastructure.ts';
 
 describe('infrastructure', () => {
   describe('safeReadEnvFile', () => {
@@ -17,7 +17,7 @@ describe('infrastructure', () => {
 
       try {
         // Act
-        const result = await safeReadEnvFile('.');
+        const result = await Infrastructure.safeReadEnvFile('.');
 
         // Assert
         expect(result).toBeNull();
@@ -43,7 +43,7 @@ describe('infrastructure', () => {
 
       try {
         // Act
-        const result = await safeReadEnvFile('.');
+        const result = await Infrastructure.safeReadEnvFile('.');
 
         // Assert
         expect(result).toEqual({
@@ -68,7 +68,7 @@ describe('infrastructure', () => {
 
       try {
         // Act
-        await safeWriteDotEnvFile({
+        await Infrastructure.safeWriteDotEnvFile({
           dirPath: '.',
           env: '',
           data: {
@@ -107,7 +107,7 @@ export KEY3=value3`;
 
       try {
         // Act
-        await safeWriteDotEnvFile({
+        await Infrastructure.safeWriteDotEnvFile({
           dirPath: '.',
           env: 'foo',
           data: {
@@ -150,7 +150,7 @@ export KEY3=value3`;
 
       try {
         // Act
-        const result = await getSettingsForPath('.');
+        const result = await Infrastructure.getSettingsForPath('.');
 
         // Assert
         expect(result).toEqual({
@@ -177,7 +177,7 @@ export KEY3=value3`;
 
       try {
         // Act
-        const result = await getSettingsForPath('.');
+        const result = await Infrastructure.getSettingsForPath('.');
 
         // Assert
         expect(result).toEqual({
@@ -201,7 +201,7 @@ export KEY3=value3`;
 
       try {
         // Act
-        const result = await getSettingsForPath('.');
+        const result = await Infrastructure.getSettingsForPath('.');
 
         // Assert
         expect(result).toEqual({
@@ -229,7 +229,7 @@ export KEY3=value3`;
 
       try {
         // Act
-        await writeSettingsForPath('.', settings);
+        await Infrastructure.writeSettingsForPath('.', settings);
 
         // Assert
         assertSpyCall(

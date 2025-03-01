@@ -37,11 +37,17 @@ export const writeEnv = new Command()
     'Includes a .env.local file when merging environment files. This file is merged last',
     { default: undefined },
   )
-  .action(async ({ dir, env, baseEnv, includeLocal }) => {
+  .option(
+    '-s, --silent',
+    'Silences all output. Used with the shell hook to avoid printing the output to the console',
+    { default: false },
+  )
+  .action(async ({ dir, env, baseEnv, includeLocal, silent }) => {
     const targetEnv = baseEnv ? '' : env;
     await writeDirEnvForPath({
       dirPath: dir || Deno.cwd(),
       env: targetEnv ?? null,
       includeLocal: includeLocal,
+      silent,
     });
   });

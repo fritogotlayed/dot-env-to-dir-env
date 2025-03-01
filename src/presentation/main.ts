@@ -1,5 +1,6 @@
 import { Command, ValidationError } from '@cliffy/command';
 import { writeEnv } from './commands/write-env.ts';
+import { hook } from './commands/hook.ts';
 
 await new Command()
   .name('dot2dir')
@@ -10,4 +11,5 @@ await new Command()
     throw new ValidationError('No sub-command specified');
   })
   .command('write-env', writeEnv).alias('writeEnv')
+  .command('hook', hook)
   .parse(Deno.args);
