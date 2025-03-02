@@ -1,5 +1,5 @@
 import { ArgumentValue, Command } from '@cliffy/command';
-import { writeDirEnvForPath } from '../../domain.ts';
+import { Domain } from '../../domain.ts';
 
 function nullableBooleanType({ value }: ArgumentValue): boolean | undefined {
   if (value === 'true' || value === '1') {
@@ -44,7 +44,7 @@ export const writeEnv = new Command()
   )
   .action(async ({ dir, env, baseEnv, includeLocal, silent }) => {
     const targetEnv = baseEnv ? '' : env;
-    await writeDirEnvForPath({
+    await Domain.writeDirEnvForPath({
       dirPath: dir || Deno.cwd(),
       env: targetEnv ?? null,
       includeLocal: includeLocal,

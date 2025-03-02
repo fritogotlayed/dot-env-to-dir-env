@@ -1,1 +1,4 @@
-- shell hooks
+- Add file modified time checks to prevent needless file writes
+- Add additional shell hooks for other shells
+  - bash
+  - fish
