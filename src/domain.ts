@@ -47,30 +47,40 @@ export class Domain {
       workingSettings.includeLocal = includeLocal;
     }
 
-    const envFile = `${dirPath}/.env`;
-    const baseData = await Infrastructure.safeReadEnvFile(envFile);
-    if (!baseData) {
+    const filesToCheck = [
+      '.env',
+      workingSettings.environment ? `.env.${workingSettings.environment}` : null,
+      workingSettings.includeLocal ? '.env.local' : null,
+    ].filter((f) => f) as string[];
+
+    const hasLocalModifications = await Infrastructure.areFilesModified(
+      dirPath,
+      filesToCheck,
+      workingSettings,
+    );
+
+    if (!hasLocalModifications) {
       if (!silent) {
-        console.log(`No .env file found at ${envFile}`);
+        console.log('No changes to files found. Bypassing processing.');
       }
       return;
     }
 
-    if (workingSettings.environment !== '') {
-      const envData = await Infrastructure.safeReadEnvFile(
-        `${dirPath}/.env.${workingSettings.environment}`,
-      );
-      if (envData) {
-        Object.assign(baseData, envData);
-      }
-    }
+    const workingData: Record<string, string> = {};
 
-    if (workingSettings.includeLocal) {
-      const localData = await Infrastructure.safeReadEnvFile(
-        `${dirPath}/.env.local`,
-      );
-      if (localData) {
-        Object.assign(baseData, localData);
+    for (const fileName of filesToCheck) {
+      const filePath = `${dirPath}/${fileName}`;
+      const fileData = await Infrastructure.safeReadEnvFile(filePath);
+
+      if (fileData) {
+        workingSettings.lastModified[fileName] = fileData.lastModified;
+        Object.assign(workingData, fileData.data);
+      } else if (fileName === '.env') {
+        // Base .env file is required
+        if (!silent) {
+          console.log(`No .env file found at $src/domain.ts`);
+        }
+        return;
       }
     }
 
@@ -79,7 +89,6 @@ export class Domain {
     await Infrastructure.safeWriteDotEnvFile({
       dirPath,
       env: workingSettings.environment,
-      data: baseData,
-    });
-  }
+      data: workingData,
+    });  }
 }

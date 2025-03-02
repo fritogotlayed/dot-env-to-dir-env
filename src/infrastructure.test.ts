@@ -28,6 +28,7 @@ describe('infrastructure', () => {
 
     it('should return key value pairs from a file', async () => {
       // Arrange
+      const now = new Date();
       const readTextFileStub = stub(
         Deno,
         'readTextFile',
@@ -40,6 +41,15 @@ describe('infrastructure', () => {
           `),
         ]),
       );
+      const statStub = stub(
+        Deno,
+        'stat',
+        returnsNext([
+          Promise.resolve({
+            mtime: now,
+          } as Deno.FileInfo),
+        ]),
+      );
 
       try {
         // Act
@@ -47,12 +57,16 @@ describe('infrastructure', () => {
 
         // Assert
         expect(result).toEqual({
-          KEY1: 'value1',
-          KEY2: 'value2',
-          KEY3: 'value3',
+          data: {
+            KEY1: 'value1',
+            KEY2: 'value2',
+            KEY3: 'value3',
+          },
+          lastModified: now.getTime(),
         });
       } finally {
         readTextFileStub.restore();
+        statStub.restore();
       }
     });
   });
@@ -156,6 +170,7 @@ export KEY3=value3`;
         expect(result).toEqual({
           environment: '',
           includeLocal: true,
+          lastModified: {},
         });
       } finally {
         readTextFileStub.restore();
@@ -183,6 +198,7 @@ export KEY3=value3`;
         expect(result).toEqual({
           environment: 'foo',
           includeLocal: true,
+          lastModified: {},
         });
       } finally {
         readTextFileStub.restore();
@@ -207,6 +223,7 @@ export KEY3=value3`;
         expect(result).toEqual({
           environment: 'bar',
           includeLocal: true,
+          lastModified: {},
         });
       } finally {
         readTextFileStub.restore();
@@ -225,6 +242,7 @@ export KEY3=value3`;
       const settings = {
         environment: 'foo',
         includeLocal: false,
+        lastModified: {},
       };
 
       try {

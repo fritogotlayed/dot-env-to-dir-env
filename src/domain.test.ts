@@ -19,6 +19,7 @@ describe('domain', () => {
           Promise.resolve({
             environment: '',
             includeLocal: true,
+            lastModified: {},
           }),
         ]),
       );
@@ -43,6 +44,13 @@ describe('domain', () => {
           Promise.resolve(),
         ]),
       );
+      const areFilesModifiedStub = stub(
+        Infrastructure,
+        'areFilesModified',
+        returnsNext([
+          Promise.resolve(false),
+        ]),
+      );
 
       try {
         // Act
@@ -61,11 +69,13 @@ describe('domain', () => {
         safeReadEnvFileStub.restore();
         writeSettingsForPathStub.restore();
         safeWriteDotEnvFileStub.restore();
+        areFilesModifiedStub.restore();
       }
     });
 
     it('writes the direnv file using base, environment, and local file appropriately', async () => {
       // Arrange
+      const now = new Date();
       const getSettingsForPathStub = stub(
         Infrastructure,
         'getSettingsForPath',
@@ -73,6 +83,7 @@ describe('domain', () => {
           Promise.resolve({
             environment: 'test',
             includeLocal: true,
+            lastModified: {},
           }),
         ]),
       );
@@ -80,9 +91,15 @@ describe('domain', () => {
         Infrastructure,
         'safeReadEnvFile',
         returnsNext([
-          Promise.resolve({ a: '1', b: '1', c: '1' }), // .env
-          Promise.resolve({ b: '2', c: '2' }), // .env.test
-          Promise.resolve({ b: '3' }), // .env.local
+          Promise.resolve({
+            data: { a: '1', b: '1', c: '1' },
+            lastModified: now.getTime(),
+          }), // .env
+          Promise.resolve({
+            data: { b: '2', c: '2' },
+            lastModified: now.getTime(),
+          }), // .env.test
+          Promise.resolve({ data: { b: '3' }, lastModified: now.getTime() }), // .env.local
         ]),
       );
       const writeSettingsForPathStub = stub(
@@ -97,6 +114,13 @@ describe('domain', () => {
         'safeWriteDotEnvFile',
         returnsNext([
           Promise.resolve(),
+        ]),
+      );
+      const areFilesModifiedStub = stub(
+        Infrastructure,
+        'areFilesModified',
+        returnsNext([
+          Promise.resolve(true),
         ]),
       );
 
@@ -115,6 +139,11 @@ describe('domain', () => {
           args: ['.', {
             environment: 'test',
             includeLocal: true,
+            lastModified: {
+              '.env': now.getTime(),
+              '.env.test': now.getTime(),
+              '.env.local': now.getTime(),
+            },
           }],
         });
         assertSpyCall(safeWriteDotEnvFileStub, 0, {
@@ -133,11 +162,13 @@ describe('domain', () => {
         safeReadEnvFileStub.restore();
         writeSettingsForPathStub.restore();
         safeWriteDotEnvFileStub.restore();
+        areFilesModifiedStub.restore();
       }
     });
 
     it('writes the direnv file using base, and environment file appropriately', async () => {
       // Arrange
+      const now = new Date();
       const getSettingsForPathStub = stub(
         Infrastructure,
         'getSettingsForPath',
@@ -145,6 +176,7 @@ describe('domain', () => {
           Promise.resolve({
             environment: 'test',
             includeLocal: false,
+            lastModified: {},
           }),
         ]),
       );
@@ -152,8 +184,8 @@ describe('domain', () => {
         Infrastructure,
         'safeReadEnvFile',
         returnsNext([
-          Promise.resolve({ a: '1', b: '1', c: '1' }), // .env
-          Promise.resolve({ b: '2', c: '2' }), // .env.test
+          Promise.resolve({ data: { a: '1', b: '1', c: '1' }, lastModified: now.getTime() }), // .env
+          Promise.resolve({ data: { b: '2', c: '2' }, lastModified: now.getTime() }), // .env.test
         ]),
       );
       const writeSettingsForPathStub = stub(
@@ -168,6 +200,13 @@ describe('domain', () => {
         'safeWriteDotEnvFile',
         returnsNext([
           Promise.resolve(),
+        ]),
+      );
+      const areFilesModifiedStub = stub(
+        Infrastructure,
+        'areFilesModified',
+        returnsNext([
+          Promise.resolve(true),
         ]),
       );
 
@@ -186,6 +225,10 @@ describe('domain', () => {
           args: ['.', {
             environment: 'test',
             includeLocal: false,
+            lastModified: {
+              '.env': now.getTime(),
+              '.env.test': now.getTime(),
+            },
           }],
         });
         assertSpyCall(safeWriteDotEnvFileStub, 0, {
@@ -204,11 +247,13 @@ describe('domain', () => {
         safeReadEnvFileStub.restore();
         writeSettingsForPathStub.restore();
         safeWriteDotEnvFileStub.restore();
+        areFilesModifiedStub.restore();
       }
     });
 
     it('switches to base env appropriately when instructed to do so', async () => {
       // Arrange
+      const now = new Date();
       const getSettingsForPathStub = stub(
         Infrastructure,
         'getSettingsForPath',
@@ -216,6 +261,7 @@ describe('domain', () => {
           Promise.resolve({
             environment: 'test',
             includeLocal: true,
+            lastModified: {},
           }),
         ]),
       );
@@ -223,8 +269,8 @@ describe('domain', () => {
         Infrastructure,
         'safeReadEnvFile',
         returnsNext([
-          Promise.resolve({ a: '1', b: '1', c: '1' }), // .env
-          Promise.resolve({ b: '3' }), // .env.local
+          Promise.resolve({ data: { a: '1', b: '1', c: '1' }, lastModified: now.getTime() }), // .env
+          Promise.resolve({ data: { b: '3' }, lastModified: now.getTime() }), // .env.local
         ]),
       );
       const writeSettingsForPathStub = stub(
@@ -239,6 +285,13 @@ describe('domain', () => {
         'safeWriteDotEnvFile',
         returnsNext([
           Promise.resolve(),
+        ]),
+      );
+      const areFilesModifiedStub = stub(
+        Infrastructure,
+        'areFilesModified',
+        returnsNext([
+          Promise.resolve(true),
         ]),
       );
 
@@ -257,6 +310,10 @@ describe('domain', () => {
           args: ['.', {
             environment: '',
             includeLocal: true,
+            lastModified: {
+              '.env': now.getTime(),
+              '.env.local': now.getTime(),
+            },
           }],
         });
         assertSpyCall(safeWriteDotEnvFileStub, 0, {
@@ -275,11 +332,13 @@ describe('domain', () => {
         safeReadEnvFileStub.restore();
         writeSettingsForPathStub.restore();
         safeWriteDotEnvFileStub.restore();
+        areFilesModifiedStub.restore();
       }
     });
 
     it('switches the environment appropriately when instructed to do so', async () => {
       // Arrange
+      const now = new Date();
       const getSettingsForPathStub = stub(
         Infrastructure,
         'getSettingsForPath',
@@ -287,6 +346,7 @@ describe('domain', () => {
           Promise.resolve({
             environment: 'test',
             includeLocal: true,
+            lastModified: {},
           }),
         ]),
       );
@@ -294,9 +354,15 @@ describe('domain', () => {
         Infrastructure,
         'safeReadEnvFile',
         returnsNext([
-          Promise.resolve({ a: '1', b: '1', c: '1' }), // .env
-          Promise.resolve({ b: '2', c: 'bar' }), // .env.bar
-          Promise.resolve({ b: '3' }), // .env.local
+          Promise.resolve({
+            data: { a: '1', b: '1', c: '1' },
+            lastModified: now.getTime(),
+          }), // .env
+          Promise.resolve({
+            data: { b: '2', c: 'bar' },
+            lastModified: now.getTime(),
+          }), // .env.bar
+          Promise.resolve({ data: { b: '3' }, lastModified: now.getTime() }), // .env.local
         ]),
       );
       const writeSettingsForPathStub = stub(
@@ -311,6 +377,13 @@ describe('domain', () => {
         'safeWriteDotEnvFile',
         returnsNext([
           Promise.resolve(),
+        ]),
+      );
+      const areFilesModifiedStub = stub(
+        Infrastructure,
+        'areFilesModified',
+        returnsNext([
+          Promise.resolve(true),
         ]),
       );
 
@@ -329,6 +402,11 @@ describe('domain', () => {
           args: ['.', {
             environment: 'bar',
             includeLocal: true,
+            lastModified: {
+              '.env': now.getTime(),
+              '.env.bar': now.getTime(),
+              '.env.local': now.getTime(),
+            },
           }],
         });
         assertSpyCall(safeWriteDotEnvFileStub, 0, {
@@ -347,6 +425,7 @@ describe('domain', () => {
         safeReadEnvFileStub.restore();
         writeSettingsForPathStub.restore();
         safeWriteDotEnvFileStub.restore();
+        areFilesModifiedStub.restore();
       }
     });
   });

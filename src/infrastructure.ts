@@ -3,15 +3,28 @@ const DOT_FILE = '.dot2dirrc';
 export type DirSettings = {
   environment: string;
   includeLocal: boolean;
+  lastModified: Record<string, number | undefined>;
+};
+
+export const DEFAULT_DIR_SETTINGS: DirSettings = {
+  environment: '',
+  includeLocal: true,
+  lastModified: {},
+};
+
+type EnvFileDetails = {
+  data: Record<string, unknown>;
+  lastModified?: number;
 };
 
 export class Infrastructure {
   static async safeReadEnvFile(
     filePath: string,
-  ): Promise<Record<string, unknown> | null> {
+  ): Promise<EnvFileDetails | null> {
     try {
       const data = await Deno.readTextFile(filePath);
-      return data.split('\n').reduce((acc, line) => {
+      const fileStats = await Deno.stat(filePath);
+      const parsedData = data.split('\n').reduce((acc, line) => {
         const [key, ...value] = line.split('=');
         // if the line is empty or a comment, ignore it
         if (!line.trim() || line.trim().startsWith('#')) {
@@ -20,6 +33,10 @@ export class Infrastructure {
         acc[key.trim()] = value.join('=').trim();
         return acc;
       }, {} as Record<string, unknown>);
+      return {
+        data: parsedData,
+        lastModified: fileStats.mtime?.getTime(),
+      };
     } catch (error) {
       if (error instanceof Deno.errors.NotFound) {
         return null;
@@ -63,21 +80,19 @@ export class Infrastructure {
       fileData = await Deno.readTextFile(dot2dirrcFile);
     } catch (error) {
       if (error instanceof Deno.errors.NotFound) {
-        return {
-          environment: '',
-          includeLocal: true,
-        };
+        return DEFAULT_DIR_SETTINGS;
       }
       throw error;
     }
 
     try {
-      return JSON.parse(fileData) as DirSettings;
+      return Object.assign({}, DEFAULT_DIR_SETTINGS, {
+        ...JSON.parse(fileData) as DirSettings,
+      });
     } catch {
-      return {
+      return Object.assign({}, DEFAULT_DIR_SETTINGS, {
         environment: fileData,
-        includeLocal: true,
-      };
+      });
     }
   }
 
@@ -90,5 +105,23 @@ export class Infrastructure {
       `${dirPath}/${DOT_FILE}`,
       JSON.stringify(settings),
     );
+  }
+
+  static async areFilesModified(
+    dirPath: string,
+    files: string[],
+    settings: DirSettings,
+  ): Promise<boolean> {
+    const results = files.map(async (fileName) => {
+      const filePath = `${dirPath}/${fileName}`;
+      const fileStats = await Deno.stat(filePath);
+      const lastModified = settings.lastModified[fileName];
+      if (lastModified === undefined || !fileStats.mtime) {
+        return true;
+      }
+      return fileStats.mtime.getTime() > lastModified;
+    });
+
+    return (await Promise.all(results)).some((result) => result);
   }
 }
