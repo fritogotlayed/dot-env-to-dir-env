@@ -114,12 +114,22 @@ export class Infrastructure {
   ): Promise<boolean> {
     const results = files.map(async (fileName) => {
       const filePath = `${dirPath}/${fileName}`;
-      const fileStats = await Deno.stat(filePath);
-      const lastModified = settings.lastModified[fileName];
-      if (lastModified === undefined || !fileStats.mtime) {
-        return true;
+      try {
+        const fileStats = await Deno.stat(filePath);
+        const lastModified = settings.lastModified[fileName];
+        if (lastModified === undefined || !fileStats.mtime) {
+          return true;
+        }
+        return fileStats.mtime.getTime() > lastModified;
+      } catch (err) {
+        if (err instanceof Deno.errors.NotFound) {
+          // When a file does not exist, we consider it un modified so that
+          // upstream consumers can bypass processing the file.
+          return false;
+        }
+        throw err;
       }
-      return fileStats.mtime.getTime() > lastModified;
+
     });
 
     return (await Promise.all(results)).some((result) => result);
