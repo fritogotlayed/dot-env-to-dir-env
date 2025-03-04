@@ -49,7 +49,9 @@ export class Domain {
 
     const filesToCheck = [
       '.env',
-      workingSettings.environment ? `.env.${workingSettings.environment}` : null,
+      workingSettings.environment
+        ? `.env.${workingSettings.environment}`
+        : null,
       workingSettings.includeLocal ? '.env.local' : null,
     ].filter((f) => f) as string[];
 
@@ -90,5 +92,6 @@ export class Domain {
       dirPath,
       env: workingSettings.environment,
       data: workingData,
-    });  }
+    });
+  }
 }

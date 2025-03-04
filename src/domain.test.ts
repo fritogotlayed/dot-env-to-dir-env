@@ -184,8 +184,14 @@ describe('domain', () => {
         Infrastructure,
         'safeReadEnvFile',
         returnsNext([
-          Promise.resolve({ data: { a: '1', b: '1', c: '1' }, lastModified: now.getTime() }), // .env
-          Promise.resolve({ data: { b: '2', c: '2' }, lastModified: now.getTime() }), // .env.test
+          Promise.resolve({
+            data: { a: '1', b: '1', c: '1' },
+            lastModified: now.getTime(),
+          }), // .env
+          Promise.resolve({
+            data: { b: '2', c: '2' },
+            lastModified: now.getTime(),
+          }), // .env.test
         ]),
       );
       const writeSettingsForPathStub = stub(
@@ -269,7 +275,10 @@ describe('domain', () => {
         Infrastructure,
         'safeReadEnvFile',
         returnsNext([
-          Promise.resolve({ data: { a: '1', b: '1', c: '1' }, lastModified: now.getTime() }), // .env
+          Promise.resolve({
+            data: { a: '1', b: '1', c: '1' },
+            lastModified: now.getTime(),
+          }), // .env
           Promise.resolve({ data: { b: '3' }, lastModified: now.getTime() }), // .env.local
         ]),
       );

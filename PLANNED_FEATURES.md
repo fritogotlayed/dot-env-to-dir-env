@@ -1,4 +1,4 @@
-- Add file modified time checks to prevent needless file writes
+- Add ability to force write-env to process the files
 - Add additional shell hooks for other shells
   - bash
   - fish

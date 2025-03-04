@@ -129,7 +129,6 @@ export class Infrastructure {
         }
         throw err;
       }
-
     });
 
     return (await Promise.all(results)).some((result) => result);
