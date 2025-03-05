@@ -129,7 +129,7 @@ describe('domain', () => {
         await Domain.writeDirEnvForPath({
           dirPath: '.',
           env: null,
-          includeLocal: undefined,
+          includeLocal: true,
           silent: true,
         });
 
@@ -435,6 +435,150 @@ describe('domain', () => {
         writeSettingsForPathStub.restore();
         safeWriteDotEnvFileStub.restore();
         areFilesModifiedStub.restore();
+      }
+    });
+
+    it('does nothing when files have not been modified and force is false', async () => {
+      // Arrange
+      const now = new Date();
+      const getSettingsForPathStub = stub(
+        Infrastructure,
+        'getSettingsForPath',
+        returnsNext([
+          Promise.resolve({
+            environment: '',
+            includeLocal: true,
+            lastModified: {
+              '.env': now.getTime(),
+              '.env.local': now.getTime(),
+            },
+          }),
+        ]),
+      );
+      const safeReadEnvFileStub = stub(
+        Infrastructure,
+        'safeReadEnvFile',
+        returnsNext([
+          Promise.resolve(null),
+        ]),
+      );
+      const writeSettingsForPathStub = stub(
+        Infrastructure,
+        'writeSettingsForPath',
+        returnsNext([
+          Promise.resolve(),
+        ]),
+      );
+      const safeWriteDotEnvFileStub = stub(
+        Infrastructure,
+        'safeWriteDotEnvFile',
+        returnsNext([
+          Promise.resolve(),
+        ]),
+      );
+      const areFilesModifiedStub = stub(
+        Infrastructure,
+        'areFilesModified',
+        returnsNext([
+          Promise.resolve(false),
+        ]),
+      );
+      const consoleLogStub = stub(
+        console,
+        'log',
+      );
+
+      try {
+        // Act
+        await Domain.writeDirEnvForPath({
+          dirPath: '.',
+          env: null,
+          includeLocal: undefined,
+          silent: false,
+          force: false,
+        });
+
+        // Assert
+        assertSpyCalls(consoleLogStub, 1);
+        assertSpyCalls(writeSettingsForPathStub, 0);
+        assertSpyCalls(safeWriteDotEnvFileStub, 0);
+      } finally {
+        getSettingsForPathStub.restore();
+        safeReadEnvFileStub.restore();
+        writeSettingsForPathStub.restore();
+        safeWriteDotEnvFileStub.restore();
+        areFilesModifiedStub.restore();
+        consoleLogStub.restore();
+      }
+    });
+
+    it('safely handles missing files when the force flag is provided', async () => {
+      // Arrange
+      const getSettingsForPathStub = stub(
+        Infrastructure,
+        'getSettingsForPath',
+        returnsNext([
+          Promise.resolve({
+            environment: '',
+            includeLocal: true,
+            lastModified: {},
+          }),
+        ]),
+      );
+      const safeReadEnvFileStub = stub(
+        Infrastructure,
+        'safeReadEnvFile',
+        returnsNext([
+          Promise.resolve(null),
+        ]),
+      );
+      const writeSettingsForPathStub = stub(
+        Infrastructure,
+        'writeSettingsForPath',
+        returnsNext([
+          Promise.resolve(),
+        ]),
+      );
+      const safeWriteDotEnvFileStub = stub(
+        Infrastructure,
+        'safeWriteDotEnvFile',
+        returnsNext([
+          Promise.resolve(),
+        ]),
+      );
+      const areFilesModifiedStub = stub(
+        Infrastructure,
+        'areFilesModified',
+        returnsNext([
+          Promise.resolve(false),
+        ]),
+      );
+      const consoleLogStub = stub(
+        console,
+        'log',
+      );
+
+      try {
+        // Act
+        await Domain.writeDirEnvForPath({
+          dirPath: '.',
+          env: null,
+          includeLocal: undefined,
+          silent: false,
+          force: true,
+        });
+
+        // Assert
+        assertSpyCalls(consoleLogStub, 1);
+        assertSpyCalls(writeSettingsForPathStub, 0);
+        assertSpyCalls(safeWriteDotEnvFileStub, 0);
+      } finally {
+        getSettingsForPathStub.restore();
+        safeReadEnvFileStub.restore();
+        writeSettingsForPathStub.restore();
+        safeWriteDotEnvFileStub.restore();
+        areFilesModifiedStub.restore();
+        consoleLogStub.restore();
       }
     });
   });

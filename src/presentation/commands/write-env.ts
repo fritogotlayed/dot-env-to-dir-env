@@ -42,12 +42,18 @@ export const writeEnv = new Command()
     'Silences all output. Used with the shell hook to avoid printing the output to the console',
     { default: false },
   )
-  .action(async ({ dir, env, baseEnv, includeLocal, silent }) => {
+  .option(
+    '-f, --force',
+    'Forces all files to be parsed even if they have not been modified since the last time they were parsed and output files to be regenerated. ',
+    { default: false },
+  )
+  .action(async ({ dir, env, baseEnv, includeLocal, silent, force }) => {
     const targetEnv = baseEnv ? '' : env;
     await Domain.writeDirEnvForPath({
       dirPath: dir || Deno.cwd(),
       env: targetEnv ?? null,
       includeLocal: includeLocal,
       silent,
+      force,
     });
   });

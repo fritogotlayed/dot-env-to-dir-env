@@ -260,4 +260,117 @@ export KEY3=value3`;
       }
     });
   });
+
+  describe('areFilesModified', () => {
+    it('should return true if the files have been updated since the last settings save', async () => {
+      // Arrange
+      const statStub = stub(
+        Deno,
+        'stat',
+        returnsNext([
+          // foo
+          Promise.resolve({
+            mtime: new Date('2022-01-01T00:00:00.000Z'),
+          } as Deno.FileInfo),
+          // bar
+          Promise.resolve({
+            mtime: new Date('2022-01-01T00:00:01.000Z'),
+          } as Deno.FileInfo)
+        ]),
+      );
+
+      try {
+        // Act
+        const result = await Infrastructure.areFilesModified('.',
+          ['foo', 'bar'],
+          {
+            environment: 'foo',
+            includeLocal: true,
+            lastModified: {
+              foo: new Date('2022-01-01T00:00:00.000Z').getTime(),
+              bar: new Date('2022-01-01T00:00:00.000Z').getTime(),
+            },
+          },
+        );
+
+        // Assert
+        expect(result).toBe(true);
+      } finally {
+        statStub.restore();
+      }
+    });
+
+    it('should return true if the files are not in the last settings save', async () => {
+      // Arrange
+      const statStub = stub(
+        Deno,
+        'stat',
+        returnsNext([
+          // foo
+          Promise.resolve({
+            mtime: new Date('2022-01-01T00:00:00.000Z'),
+          } as Deno.FileInfo),
+          // bar
+          Promise.resolve({
+            mtime: new Date('2022-01-01T00:00:01.000Z'),
+          } as Deno.FileInfo)
+        ]),
+      );
+
+      try {
+        // Act
+        const result = await Infrastructure.areFilesModified('.',
+          ['foo', 'bar'],
+          {
+            environment: 'foo',
+            includeLocal: true,
+            lastModified: {},
+          },
+        );
+
+        // Assert
+        expect(result).toBe(true);
+      } finally {
+        statStub.restore();
+      }
+    });
+
+    it('should return false if the files have not been updated since the last settings save', async () => {
+      // Arrange
+      const statStub = stub(
+        Deno,
+        'stat',
+        returnsNext([
+          // foo
+          Promise.resolve({
+            mtime: new Date('2022-01-01T00:00:00.000Z'),
+          } as Deno.FileInfo),
+          // bar
+          Promise.resolve({
+            mtime: new Date('2022-01-01T00:00:00.000Z'),
+          } as Deno.FileInfo)
+        ]),
+      );
+
+      try {
+        // Act
+        const result = await Infrastructure.areFilesModified('.',
+          ['foo', 'bar'],
+          {
+            environment: 'foo',
+            includeLocal: true,
+            lastModified: {
+              foo: new Date('2022-01-01T00:00:00.000Z').getTime(),
+              bar: new Date('2022-01-01T00:00:00.000Z').getTime(),
+            },
+          },
+        );
+
+        // Assert
+        expect(result).toBe(false);
+      } finally {
+        statStub.restore();
+      }
+    });
+  });
 });

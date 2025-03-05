@@ -10,7 +10,7 @@
     "dev:start": "deno run --allow-read --allow-write  ./src/presentation/main.ts",
     "tool:format": "deno fmt",
     "tool:test": "deno test",
-    "tool:test:coverage": "deno test --coverage && deno coverage --detailed",
+    "tool:test:coverage": "deno test --clean --coverage && deno coverage --detailed",
     "tool:checks": "deno fmt --check && deno lint && deno check **/*.ts"
   },
   "imports": {

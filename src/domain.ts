@@ -32,11 +32,13 @@ export class Domain {
     env,
     includeLocal,
     silent,
+    force,
   }: {
     dirPath: string;
     env: string | null;
     includeLocal?: boolean;
     silent?: boolean;
+    force?: boolean;
   }) {
     const workingSettings = await Infrastructure.getSettingsForPath(dirPath);
     if (env !== null) {
@@ -61,7 +63,7 @@ export class Domain {
       workingSettings,
     );
 
-    if (!hasLocalModifications) {
+    if (!hasLocalModifications && !force) {
       if (!silent) {
         console.log('No changes to files found. Bypassing processing.');
       }
