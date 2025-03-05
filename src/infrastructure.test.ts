@@ -275,23 +275,23 @@ export KEY3=value3`;
           // bar
           Promise.resolve({
             mtime: new Date('2022-01-01T00:00:01.000Z'),
-          } as Deno.FileInfo)
+          } as Deno.FileInfo),
         ]),
       );
 
       try {
         // Act
-        const result = await Infrastructure.areFilesModified('.',
-          ['foo', 'bar'],
-          {
-            environment: 'foo',
-            includeLocal: true,
-            lastModified: {
-              foo: new Date('2022-01-01T00:00:00.000Z').getTime(),
-              bar: new Date('2022-01-01T00:00:00.000Z').getTime(),
-            },
+        const result = await Infrastructure.areFilesModified('.', [
+          'foo',
+          'bar',
+        ], {
+          environment: 'foo',
+          includeLocal: true,
+          lastModified: {
+            foo: new Date('2022-01-01T00:00:00.000Z').getTime(),
+            bar: new Date('2022-01-01T00:00:00.000Z').getTime(),
           },
-        );
+        });
 
         // Assert
         expect(result).toBe(true);
@@ -313,20 +313,20 @@ export KEY3=value3`;
           // bar
           Promise.resolve({
             mtime: new Date('2022-01-01T00:00:01.000Z'),
-          } as Deno.FileInfo)
+          } as Deno.FileInfo),
         ]),
       );
 
       try {
         // Act
-        const result = await Infrastructure.areFilesModified('.',
-          ['foo', 'bar'],
-          {
-            environment: 'foo',
-            includeLocal: true,
-            lastModified: {},
-          },
-        );
+        const result = await Infrastructure.areFilesModified('.', [
+          'foo',
+          'bar',
+        ], {
+          environment: 'foo',
+          includeLocal: true,
+          lastModified: {},
+        });
 
         // Assert
         expect(result).toBe(true);
@@ -348,23 +348,23 @@ export KEY3=value3`;
           // bar
           Promise.resolve({
             mtime: new Date('2022-01-01T00:00:00.000Z'),
-          } as Deno.FileInfo)
+          } as Deno.FileInfo),
         ]),
       );
 
       try {
         // Act
-        const result = await Infrastructure.areFilesModified('.',
-          ['foo', 'bar'],
-          {
-            environment: 'foo',
-            includeLocal: true,
-            lastModified: {
-              foo: new Date('2022-01-01T00:00:00.000Z').getTime(),
-              bar: new Date('2022-01-01T00:00:00.000Z').getTime(),
-            },
+        const result = await Infrastructure.areFilesModified('.', [
+          'foo',
+          'bar',
+        ], {
+          environment: 'foo',
+          includeLocal: true,
+          lastModified: {
+            foo: new Date('2022-01-01T00:00:00.000Z').getTime(),
+            bar: new Date('2022-01-01T00:00:00.000Z').getTime(),
           },
-        );
+        });
 
         // Assert
         expect(result).toBe(false);
